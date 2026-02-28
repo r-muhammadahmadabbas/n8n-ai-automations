@@ -1,0 +1,188 @@
+{
+  "name": "Productivity",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d1596eb3-eca7-42c7-bc20-f67629354722",
+      "name": "When chat message received",
+      "webhookId": "2311783e-64c1-47a3-b88c-217378fa9a53"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are a Personal Assistant Agent with access to the user's Gmail and Google Calendar.\n\nWhen the user asks about:\n- Emails, messages, or inbox → IMMEDIATELY call the Gmail tool to fetch recent emails\n- Schedule, calendar, deadlines, or appointments → IMMEDIATELY call the Google Calendar tool to fetch upcoming events\n- Both topics → Call BOTH tools\n\nIMPORTANT: Always fetch the actual data using the tools before responding. Do not provide generic responses without checking the tools first.\n\nAfter retrieving data:\n- Summarize emails with sender, subject, and key points\n- List calendar events with date, time, and title\n- Use bullet points and bold text for dates/times\n\nYou have read-only access - you cannot send emails or create calendar events."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        320,
+        -32
+      ],
+      "id": "e6389d22-8e25-4968-99d5-776c5a9d6484",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-lite-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        240,
+        192
+      ],
+      "id": "2047470b-4f8c-4a5b-9053-2989a1d1576b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "4XTxk9zd98DhpW5X",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        192
+      ],
+      "id": "d843694e-40a5-4603-bc3f-4104b1f87174",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "c_classroom64509161@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "SDA- Spring 2026 (CS-3004) A,B,C,D,E,F,G"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        192
+      ],
+      "id": "0a871650-7c8e-4e28-b751-e7708b56aec7",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "bqOqdgE9k54k977v",
+          "name": "Google Calendar account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 2,
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        192
+      ],
+      "id": "af663ebc-45c5-42a5-9361-d9b37ba0b0e1",
+      "name": "Get many messages in Gmail",
+      "webhookId": "e48eb6f9-3224-4641-beec-44c1cd67f678",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ikGXzQlMovHl7dc3",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f350a70e-d648-4260-9dc4-864bb93a300f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "13ff57936eb0c8100f7225c4fb2d12f304698b2635f914ff0ca98f03c06c07b9"
+  },
+  "id": "K7d7I4rnEkkcyPie",
+  "tags": []
+}
