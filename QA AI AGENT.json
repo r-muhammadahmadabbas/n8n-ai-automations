@@ -1,0 +1,163 @@
+{
+  "name": "QA AI AGENT",
+  "nodes": [
+    {
+      "parameters": {
+        "availableInChat": true,
+        "agentName": "QA Chatbot",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b196b7f0-8582-4c2f-8234-4a586350582b",
+      "name": "When chat message received",
+      "webhookId": "de3deac0-0dde-4740-bcee-f397f3ff8596"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a Q&A assistant specializing in feedback data. When a user asks a question, use your search tools to query the 'question' and 'tags' columns of the QA database. Synthesize the findings into a clear answer. If the search yields no relevant results, politely state that the information is not available in the database."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        240,
+        -128
+      ],
+      "id": "eacc63e8-e235-48ee-a53b-a21c13052d0f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        176
+      ],
+      "id": "182887c6-5fbe-490a-9f87-ec52b8df8634",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "This tool searches the Feedback data table to find relevant Q&A entries. Input a highly specific search term based on the user's current inquiry. The tool will match your query against the 'question' column and return the corresponding questions alongside their answers.",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "v7aiOtOQMEjASmgy",
+          "mode": "list",
+          "cachedResultName": "q&a",
+          "cachedResultUrl": "/projects/Z9Ukva6lFudziKKH/datatables/v7aiOtOQMEjASmgy"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Question",
+              "condition": "ilike",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Value', `Search the feedback database. Use keywords or short phrases to filter results by specific questions.`, 'string') }}"
+            },
+            {
+              "keyName": "Tags",
+              "condition": "ilike",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions1_Value', `Identify the primary keywords for this AI-classified Q&A pair. Limit each tool call to a single search term.`, 'string') }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        176
+      ],
+      "id": "f1403161-a451-4c56-b5fd-116cace511dd",
+      "name": "fetch-qa-from-db"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        192,
+        176
+      ],
+      "id": "ecd00bd5-1d7e-4070-9779-41c93274e777",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "3Cqa28XJQFMy3F8G",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fetch-qa-from-db": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "fc81e7f2-1556-4985-8520-936e987a72db",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "13ff57936eb0c8100f7225c4fb2d12f304698b2635f914ff0ca98f03c06c07b9"
+  },
+  "id": "q2n0hPznmbRVONOK",
+  "tags": []
+}
